@@ -120,7 +120,7 @@ export const redeemVoucher = async (req, res) => {
 
     return res
       .status(200)
-      .json({ message: 'Voucher berhasil ditebus.', voucherValue });
+      .json({ message: 'Voucher berhasil digunakan.', voucherValue });
   } catch (error) {
     console.error(error);
     return res.status(500).send('Terjadi kesalahan server.');
