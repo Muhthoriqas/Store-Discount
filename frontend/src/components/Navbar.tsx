@@ -2,25 +2,26 @@ import React from 'react';
 
 const Navbar: React.FC = () => {
   return (
-    <nav className="flex items-center justify-between p-4 text-lg text-white bg-gray-800">
+    <nav className="flex items-center justify-between p-5 text-lg text-white bg-gray-800">
       <div className="flex items-center">
-        <ul className="flex space-x-10">
+        <ul className="flex mx-9 space-x-10">
           <li>
-            <a href="/" className="hover:text-gray-400">
+            <a
+              href="/"
+              className="hover:text-black hover:bg-white p-3 rounded-md"
+            >
               Home
             </a>
           </li>
           <li>
-            <a href="/voucher" className="hover:text-gray-400">
+            <a
+              href="/voucher"
+              className="hover:text-black hover:bg-white p-3 rounded-md"
+            >
               Voucher
             </a>
           </li>
         </ul>
-      </div>
-      <div>
-        <button className="px-4 py-2 text-white bg-green-500 rounded hover:bg-green-200 hover:text-black">
-          Login
-        </button>
       </div>
     </nav>
   );
