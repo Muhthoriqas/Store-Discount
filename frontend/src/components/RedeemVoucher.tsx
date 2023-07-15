@@ -10,12 +10,9 @@ const RedeemVoucher = () => {
 
   const handleRedeem = async () => {
     try {
-      const response = await axios.post(
-        'https://store-discount-image-lmzymzncdq-et.a.run.app/redeem',
-        {
-          voucherId,
-        }
-      );
+      const response = await axios.post('http://localhost:8080/redeem', {
+        voucherId,
+      });
 
       const { message, voucherValue } = response.data;
       setMessage(message);
@@ -38,7 +35,7 @@ const RedeemVoucher = () => {
   };
 
   return (
-    <div className="flex justify-center h-screen">
+    <div className="flex justify-center">
       <div className="w-full sm:w-2/3 lg:w-1/2">
         <h2 className="text-lg font-semibold mb-4 mt-5 text-center">
           Redeem Voucher
@@ -67,12 +64,15 @@ const RedeemVoucher = () => {
         >
           <div className="modal-content bg-white p-4 rounded-md">
             <h2 className="text-lg font-semibold mb-4">
-              {voucherValue
-                ? 'Voucher Berhasil Digunakan!'
-                : 'Gagal Redeem Voucher'}
+              {voucherValue ? 'Berhasil Digunakan!' : 'Gagal Redeem Voucher'}
             </h2>
             <p>{message}</p>
-            {voucherValue && <p>Nilai voucher: {voucherValue}</p>}
+            {voucherValue && (
+              <p className="mt-3 mb-3">
+                {' '}
+                <strong>Nilai voucher: {voucherValue}</strong>
+              </p>
+            )}
             <button
               onClick={closeModal}
               className="modal-close mt-4 px-4 py-2 bg-blue-500 text-white font-semibold rounded hover:bg-blue-600"

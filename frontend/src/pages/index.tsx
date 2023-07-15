@@ -34,7 +34,53 @@ const Home: React.FC<HomeProps> = ({ products }) => {
   const [voucherId, setVoucherId] = useState<string | null>(null);
   const [voucherValue, setVoucherValue] = useState<number | null>(null);
   const [expireDate, setExpireDate] = useState<string | null>(null);
-  const [wallet, setWallet] = useState(100000000);
+  const [wallet, setWalletValue] = useState(0);
+  const [totalBuy, setTotalBuy] = useState(0);
+
+  const fetchWallet = async () => {
+    try {
+      const response = await axios.get('http://localhost:8080/wallet');
+      setWalletValue(response.data.walletValue);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const fetchTotalBuy = async () => {
+    try {
+      const response = await axios.get('http://localhost:8080/total');
+      setTotalBuy(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const updateWallet = async (newWalletValue: number) => {
+    try {
+      await axios.put('http://localhost:8080/update/wallet', {
+        walletValue: newWalletValue,
+      });
+      setWalletValue(newWalletValue);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const updateTotalBuy = async (newTotalBuy: number) => {
+    try {
+      await axios.put('http://localhost:8080/update/total', {
+        totalbuyerValue: newTotalBuy,
+      });
+      setTotalBuy(newTotalBuy);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchWallet();
+    fetchTotalBuy();
+  }, []);
 
   const handleBuy = (product: Product, quantity: number) => {
     const itemIndex = cartItems.findIndex(
@@ -112,7 +158,6 @@ const Home: React.FC<HomeProps> = ({ products }) => {
     }, 0);
     setTotalPayment(newTotalPayment);
   };
-
   const handleCheckout = async (totalPayment: number) => {
     if (totalPayment > wallet) {
       setIsFailureModalOpen(true);
@@ -120,29 +165,36 @@ const Home: React.FC<HomeProps> = ({ products }) => {
     }
 
     try {
-      const response = await axios.post(
-        'https://store-discount-image-lmzymzncdq-et.a.run.app/checkout',
-        {
-          boughtItems,
-          totalPayment,
-        }
-      );
+      // Memperbarui totalBuy dengan permintaan ke server
+
+      const newTotalBuyValue = totalBuy + totalPayment;
+
+      const response = await axios.post('http://localhost:8080/checkout', {
+        boughtItems,
+        totalBuy: newTotalBuyValue,
+      });
 
       const voucherId = response.data.id;
-      const { voucherValue } = response.data;
-      const { expiresAt } = response.data;
+      const voucherValue = response.data.voucherValue;
+      const expireDate = response.data.expiresAt;
 
       setIsSuccessModalOpen(true);
 
       if (voucherValue !== undefined && voucherValue !== null) {
         setVoucherId(voucherId);
         setVoucherValue(voucherValue);
-        setExpireDate(expiresAt);
+        setExpireDate(expireDate);
       } else {
         setVoucherValue(null);
       }
 
-      setWallet(wallet - totalPayment);
+      // Update wallet and total buy
+      const newWalletValue = wallet - totalPayment;
+
+      updateWallet(newWalletValue);
+      updateTotalBuy(newTotalBuyValue);
+
+      setWalletValue(newWalletValue);
       setBoughtItems([]);
       recalculateTotalPayment();
     } catch (error) {
@@ -154,10 +206,51 @@ const Home: React.FC<HomeProps> = ({ products }) => {
     recalculateTotalPayment();
   }, [boughtItems]);
 
+  const resetWalletValue = async () => {
+    try {
+      const response = await axios.put('http://localhost:8080/reset/wallet');
+      const newWalletValue = response.data.walletValue;
+      setWalletValue(newWalletValue);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const resetTotalBuyValue = async () => {
+    try {
+      const response = await axios.put('http://localhost:8080/reset/total');
+      const totalbuyerValue = response.data.totalbuyerValue;
+      setTotalBuy(totalbuyerValue);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <div>
       <Navbar />
-      <h1 className="font-semibold m-5 text-2xl">Wallet: {wallet}</h1>
+
+      <div className="flex flex-row items-center justify-between m-4 shadow-lg p-4">
+        <div>
+          <h1 className="font-semibold m-0 text-2xl">Wallet: {wallet}</h1>
+          <h1 className="font-semibold m-0 text-2xl">Total Buy: {totalBuy}</h1>
+        </div>
+
+        <div>
+          <button
+            className="px-4 py-2 text-white bg-green-500 rounded hover:bg-green-200 hover:text-black"
+            onClick={resetWalletValue}
+          >
+            Reset Wallet
+          </button>
+          <button
+            className="px-4 py-2 ml-3 text-white bg-blue-500 rounded hover:bg-blue-200 hover:text-black"
+            onClick={resetTotalBuyValue}
+          >
+            Reset Total Belanja
+          </button>
+        </div>
+      </div>
 
       <div className="grid grid-cols-3 gap-4">
         {products.map((product) => (
@@ -303,14 +396,33 @@ const Home: React.FC<HomeProps> = ({ products }) => {
 
 export const getServerSideProps: GetServerSideProps<HomeProps> = async () => {
   try {
-    const response = await axios.get(
-      'https://store-discount-image-lmzymzncdq-et.a.run.app/products'
-    );
-    const products = response.data;
-    return { props: { products } };
+    const [productsResponse, walletResponse, totalBuyResponse] =
+      await Promise.all([
+        axios.get('http://localhost:8080/products'),
+        axios.get('http://localhost:8080/wallet'),
+        axios.get('http://localhost:8080/total'),
+      ]);
+
+    const products = productsResponse.data;
+    const walletValue = walletResponse.data.walletValue;
+    const totalBuyValue = totalBuyResponse.data;
+
+    return {
+      props: {
+        products,
+        walletValue,
+        totalBuyValue,
+      },
+    };
   } catch (error) {
     console.error(error);
-    return { props: { products: [] } };
+    return {
+      props: {
+        products: [],
+        walletValue: 0,
+        totalBuyValue: 0,
+      },
+    };
   }
 };
 
