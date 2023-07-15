@@ -6,12 +6,12 @@ const Navbar: React.FC = () => {
       <div className="flex items-center">
         <ul className="flex space-x-10">
           <li>
-            <a href="#" className="hover:text-gray-400">
+            <a href="/" className="hover:text-gray-400">
               Home
             </a>
           </li>
           <li>
-            <a href="#" className="hover:text-gray-400">
+            <a href="/voucher" className="hover:text-gray-400">
               Voucher
             </a>
           </li>
