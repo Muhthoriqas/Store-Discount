@@ -37,7 +37,7 @@ export const getProductsById = async (req, res) => {
 // Endpoint untuk berbelanja dan mendapatkan voucher
 export const checkout = async (req, res) => {
   try {
-    const { totalPayment } = req.body;
+    const { totalBuy } = req.body;
 
     const date = new Date();
     const tanggalTransaksi = `${date.getDate()}-${
@@ -45,11 +45,11 @@ export const checkout = async (req, res) => {
     }-${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
 
     const transactionData = {
-      totalPayment,
+      totalBuy,
       tanggalTransaksi,
     };
 
-    if (totalPayment >= 2000000) {
+    if (totalBuy >= 2000000 && totalBuy % 2000000 === 0) {
       const expiresAt = new Date();
       expiresAt.setMonth(expiresAt.getMonth() + 3);
 
@@ -57,10 +57,8 @@ export const checkout = async (req, res) => {
         expiresAt.getMonth() + 1
       }-${expiresAt.getFullYear()} ${expiresAt.getHours()}:${expiresAt.getMinutes()}:${expiresAt.getSeconds()}`;
 
-      const kelipatan = Math.floor(totalPayment / 2000000);
-      const voucherValue = kelipatan * 10000;
       const voucherData = {
-        voucherValue,
+        voucherValue: 10000,
         expiresAt: formattedExpiresAt,
       };
 
@@ -93,19 +91,24 @@ export const redeemVoucher = async (req, res) => {
   try {
     const { voucherId } = req.body;
 
-    const voucherSnapshoot = await db
+    const voucherSnapshot = await db
       .collection('vouchers')
       .where('id', '==', voucherId)
       .get();
 
-    if (voucherSnapshoot.empty) {
+    if (voucherSnapshot.empty) {
       console.error('tidak valid');
       return res.status(404).send('Voucher tidak valid.');
     }
 
-    const voucherDoc = voucherSnapshoot.docs[0];
-    const vocuherData = voucherDoc.data();
-    const expiresAt = vocuherData.expiresAt;
+    const walletSnapshot = await db.collection('wallet').get();
+    const walletDoc = walletSnapshot.docs[0].ref;
+    const walletData = walletSnapshot.docs[0].data();
+    let walletValue = walletData.walletValue;
+
+    const voucherDoc = voucherSnapshot.docs[0];
+    const voucherData = voucherDoc.data();
+    const expiresAt = voucherData.expiresAt;
 
     const currentDate = new Date();
     const isExpired = currentDate > new Date(expiresAt);
@@ -114,13 +117,18 @@ export const redeemVoucher = async (req, res) => {
       return res.status(400).send('Voucher telah kadaluarsa.');
     }
 
-    const voucherValue = vocuherData.voucherValue;
+    const voucherValue = voucherData.voucherValue;
+    walletValue += voucherValue;
 
-    await voucherDoc.ref.delete();
+    await Promise.all([
+      voucherDoc.ref.delete(),
+      walletDoc.update({ walletValue }),
+    ]);
 
-    return res
-      .status(200)
-      .json({ message: 'Voucher berhasil digunakan.', voucherValue });
+    return res.status(200).json({
+      message: 'Voucher berhasil digunakan. Lihat wallet mu di dashboard yuk!',
+      voucherValue,
+    });
   } catch (error) {
     console.error(error);
     return res.status(500).send('Terjadi kesalahan server.');
@@ -164,7 +172,25 @@ export const getWallet = async (req, res) => {
     const snapshot = await db.collection('wallet').get();
     const wallet = snapshot.docs[0].data();
     const walletValue = wallet.walletValue;
-    return res.status(200).json(walletValue);
+
+    const response = { walletValue };
+    return res.status(200).json(response);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Terjadi kesalahan server.');
+  }
+};
+
+export const updateWallet = async (req, res) => {
+  try {
+    const { walletValue } = req.body;
+
+    const snapshot = await db.collection('wallet').get();
+    const wallet = snapshot.docs[0].ref;
+    const updateData = { walletValue: walletValue };
+    await wallet.update(updateData);
+
+    return res.status(200).json(updateData);
   } catch (error) {
     console.error(error);
     res.status(500).send('Terjadi kesalahan server.');
@@ -175,8 +201,53 @@ export const resetWallet = async (req, res) => {
   try {
     const snapshot = await db.collection('wallet').get();
     const wallet = snapshot.docs[0].ref;
-    await wallet.update({ walletValue: 10000000 });
-    return res.status(200).json(10000000);
+
+    const resetWalletData = { walletValue: 10000000 };
+    await wallet.update(resetWalletData);
+
+    return res.status(200).json(resetWalletData);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Terjadi kesalahan server.');
+  }
+};
+
+export const getTotalBuy = async (req, res) => {
+  try {
+    const snapshot = await db.collection('totalbuyer').get();
+    const totalbuyer = snapshot.docs[0].data();
+    const totalbuyerValue = totalbuyer.totalbuyerValue;
+    return res.status(200).json(totalbuyerValue);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Terjadi kesalahan server.');
+  }
+};
+
+export const updateTotal = async (req, res) => {
+  try {
+    const { totalbuyerValue } = req.body;
+
+    const snapshot = await db.collection('totalbuyer').get();
+    const totalbuyer = snapshot.docs[0].ref;
+    const updateData = { totalbuyerValue: totalbuyerValue };
+    await totalbuyer.update(updateData);
+
+    return res.status(200).json(updateData);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Terjadi kesalahan server.');
+  }
+};
+
+export const resetTotalBuy = async (req, res) => {
+  try {
+    const snapshot = await db.collection('totalbuyer').get();
+    const totalbuyer = snapshot.docs[0].ref;
+    const resetTotalBuyData = { totalbuyerValue: 0 };
+    await totalbuyer.update(resetTotalBuyData);
+
+    return res.status(200).json(resetTotalBuyData);
   } catch (error) {
     console.error(error);
     res.status(500).send('Terjadi kesalahan server.');
