@@ -4,5 +4,5 @@
   "cloudStorageCredential": ".json",
   "firebaseAdminCredential": ".json",
   "firebaseConfigCredentail": ".json",
-  "databaseURL": "https://"
+  "databaseURL": "https://<<ProjectIDHere>>.firebaseio.com"
 }
