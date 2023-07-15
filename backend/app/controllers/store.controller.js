@@ -99,6 +99,7 @@ export const redeemVoucher = async (req, res) => {
       .get();
 
     if (voucherSnapshoot.empty) {
+      console.error('tidak valid');
       return res.status(404).send('Voucher tidak valid.');
     }
 
@@ -152,6 +153,30 @@ export const getVoucherById = async (req, res) => {
     }
     const voucherData = voucherDoc.data();
     return res.json({ id: voucherDoc.id, ...voucherData });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Terjadi kesalahan server.');
+  }
+};
+
+export const getWallet = async (req, res) => {
+  try {
+    const snapshot = await db.collection('wallet').get();
+    const wallet = snapshot.docs[0].data();
+    const walletValue = wallet.walletValue;
+    return res.status(200).json(walletValue);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Terjadi kesalahan server.');
+  }
+};
+
+export const resetWallet = async (req, res) => {
+  try {
+    const snapshot = await db.collection('wallet').get();
+    const wallet = snapshot.docs[0].ref;
+    await wallet.update({ walletValue: 10000000 });
+    return res.status(200).json(10000000);
   } catch (error) {
     console.error(error);
     res.status(500).send('Terjadi kesalahan server.');
