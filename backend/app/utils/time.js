@@ -1,5 +1,4 @@
 import moment from 'moment';
-// eslint-disable-next-line import/no-extraneous-dependencies
 import 'moment-timezone';
 import admin from 'firebase-admin';
 
