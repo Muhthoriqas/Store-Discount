@@ -19,9 +19,7 @@ const VoucherPage = () => {
 
   const fetchVouchers = async () => {
     try {
-      const response = await axios.get(
-        'https://store-discount-image-lmzymzncdq-et.a.run.app/vouchers'
-      );
+      const response = await axios.get('http://localhost:8080/vouchers');
       setVouchers(response.data);
     } catch (error) {
       console.error(error);
@@ -31,8 +29,9 @@ const VoucherPage = () => {
   return (
     <div>
       <Navbar />
+      <RedeemVoucher />
 
-      <div className="flex justify-center">
+      <div className="flex justify-center p-5">
         <div className="w-full sm:w-2/3 lg:w-1/2">
           <h1 className="text-2xl font-bold mb-4 mt-5 text-center">
             Daftar Voucher
@@ -76,16 +75,13 @@ const VoucherPage = () => {
           </div>
         </div>
       </div>
-      <RedeemVoucher />
     </div>
   );
 };
 
 export const getServerSideProps = async () => {
   try {
-    const response = await axios.get(
-      'https://store-discount-image-lmzymzncdq-et.a.run.app/vouchers'
-    );
+    const response = await axios.get('http://localhost:8080/vouchers');
     const vouchers: Voucher[] = response.data;
     return { props: { vouchers } };
   } catch (error) {
