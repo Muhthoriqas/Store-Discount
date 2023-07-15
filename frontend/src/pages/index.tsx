@@ -71,6 +71,7 @@ const Home: React.FC<HomeProps> = ({ products }) => {
       await axios.put('http://localhost:8080/update/total', {
         totalbuyerValue: newTotalBuy,
       });
+
       setTotalBuy(newTotalBuy);
     } catch (error) {
       console.error(error);
@@ -158,6 +159,7 @@ const Home: React.FC<HomeProps> = ({ products }) => {
     }, 0);
     setTotalPayment(newTotalPayment);
   };
+
   const handleCheckout = async (totalPayment: number) => {
     if (totalPayment > wallet) {
       setIsFailureModalOpen(true);
@@ -167,13 +169,13 @@ const Home: React.FC<HomeProps> = ({ products }) => {
     try {
       // Memperbarui totalBuy dengan permintaan ke server
 
-      const newTotalBuyValue = totalBuy + totalPayment;
+      let newTotalBuyValue = totalBuy + totalPayment;
 
       const response = await axios.post('http://localhost:8080/checkout', {
         boughtItems,
         totalBuy: newTotalBuyValue,
       });
-
+      newTotalBuyValue = totalBuy + totalPayment;
       const voucherId = response.data.id;
       const voucherValue = response.data.voucherValue;
       const expireDate = response.data.expiresAt;

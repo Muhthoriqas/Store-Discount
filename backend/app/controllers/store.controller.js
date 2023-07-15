@@ -33,8 +33,6 @@ export const getProductsById = async (req, res) => {
     res.status(500).send('Terjadi kesalahan server.');
   }
 };
-
-// Endpoint untuk berbelanja dan mendapatkan voucher
 export const checkout = async (req, res) => {
   try {
     const { totalBuy } = req.body;
@@ -49,37 +47,61 @@ export const checkout = async (req, res) => {
       tanggalTransaksi,
     };
 
-    if (totalBuy >= 2000000 && totalBuy % 2000000 === 0) {
-      const expiresAt = new Date();
-      expiresAt.setMonth(expiresAt.getMonth() + 3);
+    // Ambil data terakhir dari database
+    const lastTokenSnapshot = await db
+      .collection('tokens')
+      .orderBy('createdAt', 'desc')
+      .limit(1)
+      .get();
+    let lastToken = 0;
 
-      const formattedExpiresAt = `${expiresAt.getDate()}-${
-        expiresAt.getMonth() + 1
-      }-${expiresAt.getFullYear()} ${expiresAt.getHours()}:${expiresAt.getMinutes()}:${expiresAt.getSeconds()}`;
-
-      const voucherData = {
-        voucherValue: 10000,
-        expiresAt: formattedExpiresAt,
-      };
-
-      const newVoucherRef = await db.collection('vouchers').add(voucherData);
-      const newVoucherId = newVoucherRef.id;
-
-      await db
-        .collection('vouchers')
-        .doc(newVoucherId)
-        .update({ id: newVoucherId });
-
-      const newVoucherData = {
-        id: newVoucherId,
-        ...voucherData,
-      };
-
-      return res.status(201).json({ ...newVoucherData, ...transactionData });
+    if (!lastTokenSnapshot.empty) {
+      lastToken = lastTokenSnapshot.docs[0].data().value;
     }
 
-    await db.collection('transactions').add(transactionData);
+    // Memeriksa apakah total pembelian pengguna memenuhi syarat untuk mendapatkan token
+    if (totalBuy >= lastToken + 2000000) {
+      const kelipatan = Math.floor(totalBuy / 2000000);
+      const nextToken = kelipatan * 2000000;
 
+      // Memperbarui token terakhir dengan nilai berikutnya pada database
+      await db
+        .collection('tokens')
+        .add({ value: nextToken, createdAt: new Date() });
+
+      // Memberikan token kepada pengguna jika total pembelian mencapai token berikutnya
+      if (totalBuy >= nextToken) {
+        const expiresAt = new Date();
+        expiresAt.setMonth(expiresAt.getMonth() + 3);
+
+        const formattedExpiresAt = `${expiresAt.getDate()}-${
+          expiresAt.getMonth() + 1
+        }-${expiresAt.getFullYear()} ${expiresAt.getHours()}:${expiresAt.getMinutes()}:${expiresAt.getSeconds()}`;
+
+        const voucherData = {
+          voucherValue: 10000,
+          expiresAt: formattedExpiresAt,
+        };
+
+        const newVoucherRef = await db.collection('vouchers').add(voucherData);
+        const newVoucherId = newVoucherRef.id;
+
+        await db
+          .collection('vouchers')
+          .doc(newVoucherId)
+          .update({ id: newVoucherId });
+
+        const newVoucherData = {
+          id: newVoucherId,
+          ...voucherData,
+        };
+
+        return res.status(201).json({ ...newVoucherData, ...transactionData });
+      }
+    }
+
+    // Jika total pembelian pengguna tidak memenuhi syarat untuk mendapatkan voucher, hanya simpan data transaksi
+    await db.collection('transactions').add(transactionData);
     return res.status(201).json(transactionData);
   } catch (error) {
     console.error(error);
