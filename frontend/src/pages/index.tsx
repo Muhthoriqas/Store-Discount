@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { GetServerSideProps } from 'next';
-import Modal from 'react-modal'; // Import React-Modal
+import Modal from 'react-modal';
 import ProductCard from '../components/productCard';
 import Navbar from '../components/Navbar';
 import 'tailwindcss/tailwind.css';
@@ -29,12 +29,12 @@ const Home: React.FC<HomeProps> = ({ products }) => {
   const [boughtItems, setBoughtItems] = useState<CartItem[]>([]);
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [editedQuantity, setEditedQuantity] = useState(0);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [isFailureModalOpen, setIsFailureModalOpen] = useState(false);
   const [voucherId, setVoucherId] = useState<string | null>(null);
   const [voucherValue, setVoucherValue] = useState<number | null>(null);
   const [expireDate, setExpireDate] = useState<string | null>(null);
-
-  console.log(voucherValue);
+  const [wallet, setWallet] = useState(100000000);
 
   const handleBuy = (product: Product, quantity: number) => {
     const itemIndex = cartItems.findIndex(
@@ -76,6 +76,13 @@ const Home: React.FC<HomeProps> = ({ products }) => {
     }
   };
 
+  const handleChangeEditedQuantity = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const newQuantity = parseInt(e.target.value, 10);
+    setEditedQuantity(newQuantity);
+  };
+
   const handleUpdateQuantity = (itemId: string) => {
     const updatedBoughtItems = boughtItems.map((item) => {
       if (item.product.id === itemId) {
@@ -105,21 +112,28 @@ const Home: React.FC<HomeProps> = ({ products }) => {
     }, 0);
     setTotalPayment(newTotalPayment);
   };
+
   const handleCheckout = async (totalPayment: number) => {
+    if (totalPayment > wallet) {
+      setIsFailureModalOpen(true);
+      return;
+    }
+
     try {
-      const response = await axios.post('http://localhost:8080/checkout', {
-        boughtItems,
-        totalPayment,
-      });
-      console.log(response);
+      const response = await axios.post(
+        'https://store-discount-image-lmzymzncdq-et.a.run.app/checkout',
+        {
+          boughtItems,
+          totalPayment,
+        }
+      );
 
       const voucherId = response.data.id;
       const { voucherValue } = response.data;
       const { expiresAt } = response.data;
 
-      setIsModalOpen(true);
+      setIsSuccessModalOpen(true);
 
-      console.log('ini', voucherValue);
       if (voucherValue !== undefined && voucherValue !== null) {
         setVoucherId(voucherId);
         setVoucherValue(voucherValue);
@@ -128,7 +142,7 @@ const Home: React.FC<HomeProps> = ({ products }) => {
         setVoucherValue(null);
       }
 
-      // Reset bought items after checkout
+      setWallet(wallet - totalPayment);
       setBoughtItems([]);
       recalculateTotalPayment();
     } catch (error) {
@@ -143,6 +157,7 @@ const Home: React.FC<HomeProps> = ({ products }) => {
   return (
     <div>
       <Navbar />
+      <h1 className="font-semibold m-5 text-2xl">Wallet: {wallet}</h1>
 
       <div className="grid grid-cols-3 gap-4">
         {products.map((product) => (
@@ -171,9 +186,7 @@ const Home: React.FC<HomeProps> = ({ products }) => {
                           type="number"
                           min="1"
                           value={editedQuantity}
-                          onChange={(e) =>
-                            setEditedQuantity(Number(e.target.value))
-                          }
+                          onChange={handleChangeEditedQuantity}
                           className="w-16 px-2 py-1 border border-gray-300"
                         />
                       </td>
@@ -215,15 +228,15 @@ const Home: React.FC<HomeProps> = ({ products }) => {
             <button
               className="px-3 py-1 text-sm font-semibold text-white bg-green-500 rounded hover:bg-green-600"
               onClick={() => handleCheckout(totalPayment)}
+              disabled={boughtItems.length === 0}
             >
               Checkout
             </button>
           </div>
-          {/* Pop-up */}
 
           <Modal
-            isOpen={isModalOpen}
-            onRequestClose={() => setIsModalOpen(false)}
+            isOpen={isSuccessModalOpen}
+            onRequestClose={() => setIsSuccessModalOpen(false)}
             contentLabel="Checkout Success"
             className="fixed inset-0 z-50 flex items-center justify-center shadow-lg"
             overlayClassName="fixed inset-0 bg-transparent opacity-100 flex items-center justify-center"
@@ -254,7 +267,28 @@ const Home: React.FC<HomeProps> = ({ products }) => {
               </p>
 
               <button
-                onClick={() => setIsModalOpen(false)}
+                onClick={() => setIsSuccessModalOpen(false)}
+                className="px-4 py-2 mt-4 text-white bg-blue-500 rounded hover:bg-blue-600"
+              >
+                Tutup
+              </button>
+            </div>
+          </Modal>
+
+          <Modal
+            isOpen={isFailureModalOpen}
+            onRequestClose={() => setIsFailureModalOpen(false)}
+            contentLabel="Checkout Failure"
+            className="fixed inset-0 z-50 flex items-center justify-center shadow-lg"
+            overlayClassName="fixed inset-0 bg-transparent opacity-100 flex items-center justify-center"
+          >
+            <div className="w-full max-w-md text-white bg-red-600 rounded-lg shadow-lg p-9">
+              <h2 className="mb-4 text-2xl font-bold">Pembelian Gagal!</h2>
+              <p className="mb-4">
+                Total pembayaran melebihi saldo wallet Anda.
+              </p>
+              <button
+                onClick={() => setIsFailureModalOpen(false)}
                 className="px-4 py-2 mt-4 text-white bg-blue-500 rounded hover:bg-blue-600"
               >
                 Tutup
@@ -269,7 +303,9 @@ const Home: React.FC<HomeProps> = ({ products }) => {
 
 export const getServerSideProps: GetServerSideProps<HomeProps> = async () => {
   try {
-    const response = await axios.get('http://localhost:8080/products');
+    const response = await axios.get(
+      'https://store-discount-image-lmzymzncdq-et.a.run.app/products'
+    );
     const products = response.data;
     return { props: { products } };
   } catch (error) {
