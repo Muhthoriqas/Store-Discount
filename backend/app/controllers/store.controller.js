@@ -37,7 +37,7 @@ export const getProductsById = async (req, res) => {
 // Endpoint untuk berbelanja dan mendapatkan voucher
 export const checkout = async (req, res) => {
   try {
-    const { totalBelanja } = req.body;
+    const { totalPayment } = req.body;
 
     const date = new Date();
     const tanggalTransaksi = `${date.getDate()}-${
@@ -45,11 +45,11 @@ export const checkout = async (req, res) => {
     }-${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
 
     const transactionData = {
-      totalBelanja,
+      totalPayment,
       tanggalTransaksi,
     };
 
-    if (totalBelanja >= 2000000) {
+    if (totalPayment >= 2000000) {
       const expiresAt = new Date();
       expiresAt.setMonth(expiresAt.getMonth() + 3);
 
@@ -57,7 +57,7 @@ export const checkout = async (req, res) => {
         expiresAt.getMonth() + 1
       }-${expiresAt.getFullYear()} ${expiresAt.getHours()}:${expiresAt.getMinutes()}:${expiresAt.getSeconds()}`;
 
-      const kelipatan = Math.floor(totalBelanja / 2000000);
+      const kelipatan = Math.floor(totalPayment / 2000000);
       const voucherValue = kelipatan * 10000;
       const voucherData = {
         voucherValue,
