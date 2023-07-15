@@ -1,5 +1,4 @@
 steps:
-
   # Retrieve the config.json file
   - name: 'gcr.io/cloud-builders/gcloud'
     entrypoint: 'bash'
@@ -7,14 +6,6 @@ steps:
       - '-c'
       - |
         gcloud secrets versions access latest --secret="config-file" --format='get(payload.data)' | base64 -d > app/config/${_CONFIG_NAME}
-        
-  # Retrieve the cloud-storage-credential secret
-  - name: 'gcr.io/cloud-builders/gcloud'
-    entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
-        gcloud secrets versions access latest --secret="cloud-storage-credential" --format='get(payload.data)' | base64 -d > app/config/${_CONFIG_STORAGE_NAME}
 
   # Retrieve the firebase-config secret
   - name: 'gcr.io/cloud-builders/gcloud'
@@ -34,14 +25,39 @@ steps:
 
   # Build the container image
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'asia-southeast2-docker.pkg.dev/$PROJECT_ID/${_SERVICE_NAME}/${_IMAGE_NAME}:${SHORT_SHA}', '.']
+    args:
+      [
+        'build',
+        '-t',
+        'asia-southeast2-docker.pkg.dev/$PROJECT_ID/${_SERVICE_NAME}/${_IMAGE_NAME}:${SHORT_SHA}',
+        '.',
+      ]
     id: 'Building the container image'
 
   # Push the container image to Container Registry
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'asia-southeast2-docker.pkg.dev/$PROJECT_ID/${_SERVICE_NAME}/${_IMAGE_NAME}:${SHORT_SHA}']
+    args:
+      [
+        'push',
+        'asia-southeast2-docker.pkg.dev/$PROJECT_ID/${_SERVICE_NAME}/${_IMAGE_NAME}:${SHORT_SHA}',
+      ]
     id: 'Pushing the image to registry'
 
   # Deploy container image to Cloud Run
-  - name: 'gcr.io/cloud-builders/gcloud' 
-    args: ['run', 'deploy', '${_IMAGE_NAME}', '--image', 'asia-southeast2-docker.pkg.dev/$PROJECT_ID/${_SERVICE_NAME}/${_IMAGE_NAME}:${SHORT_SHA}', '--region', 'asia-southeast2', '--platform', 'managed', "--allow-unauthenticated", '--tag', 'latest', '--allow-unauthenticated']
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args:
+      [
+        'run',
+        'deploy',
+        '${_IMAGE_NAME}',
+        '--image',
+        'asia-southeast2-docker.pkg.dev/$PROJECT_ID/${_SERVICE_NAME}/${_IMAGE_NAME}:${SHORT_SHA}',
+        '--region',
+        'asia-southeast2',
+        '--platform',
+        'managed',
+        '--allow-unauthenticated',
+        '--tag',
+        'latest',
+        '--allow-unauthenticated',
+      ]
