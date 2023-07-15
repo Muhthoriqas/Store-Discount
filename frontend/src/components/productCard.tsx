@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Image from 'next/image';
 import 'tailwindcss/tailwind.css';
 
 type Product = {
@@ -34,7 +35,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onBuy }) => {
     <div className="overflow-hidden bg-white rounded-lg shadow-lg card">
       <div className="flex justify-center">
         <div className="w-2/4 h-50">
-          <img
+          <Image
             src={product.imageURL}
             alt={product.name}
             style={{ width: '200px', height: '160px' }}
