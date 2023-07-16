@@ -2,8 +2,11 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { GetServerSideProps } from 'next';
 import Modal from 'react-modal';
-import ProductCard from '../components/productCard';
+import CustomModal from '../components/CustomModal';
 import Navbar from '../components/Navbar';
+import Wallet from '../components/Wallet';
+import ProductCard from '../components/ProductCard';
+import BoughtItems from '../components/BoughtItems';
 import 'tailwindcss/tailwind.css';
 
 Modal.setAppElement('#__next');
@@ -167,8 +170,6 @@ const Home: React.FC<HomeProps> = ({ products }) => {
     }
 
     try {
-      // Memperbarui totalBuy dengan permintaan ke server
-
       let newTotalBuyValue = totalBuy + totalPayment;
 
       const response = await axios.post('http://localhost:8080/checkout', {
@@ -208,7 +209,7 @@ const Home: React.FC<HomeProps> = ({ products }) => {
     recalculateTotalPayment();
   }, [boughtItems]);
 
-  const resetWalletValue = async () => {
+  const handleResetWallet = async () => {
     try {
       const response = await axios.put('http://localhost:8080/reset/wallet');
       const newWalletValue = response.data.walletValue;
@@ -218,7 +219,7 @@ const Home: React.FC<HomeProps> = ({ products }) => {
     }
   };
 
-  const resetTotalBuyValue = async () => {
+  const handleResetTotalBuy = async () => {
     try {
       const response = await axios.put('http://localhost:8080/reset/total');
       const totalbuyerValue = response.data.totalbuyerValue;
@@ -232,27 +233,12 @@ const Home: React.FC<HomeProps> = ({ products }) => {
     <div>
       <Navbar />
 
-      <div className="flex flex-row items-center justify-between p-4 m-4 shadow-lg">
-        <div>
-          <h1 className="m-0 text-2xl font-semibold">Wallet: {wallet}</h1>
-          <h1 className="m-0 text-2xl font-semibold">Total Buy: {totalBuy}</h1>
-        </div>
-
-        <div>
-          <button
-            className="px-4 py-2 text-white bg-green-500 rounded hover:bg-green-200 hover:text-black"
-            onClick={resetWalletValue}
-          >
-            Reset Wallet
-          </button>
-          <button
-            className="px-4 py-2 ml-3 text-white bg-blue-500 rounded hover:bg-blue-200 hover:text-black"
-            onClick={resetTotalBuyValue}
-          >
-            Reset Total Belanja
-          </button>
-        </div>
-      </div>
+      <Wallet
+        wallet={wallet}
+        totalBuy={totalBuy}
+        onResetWallet={handleResetWallet}
+        onResetTotalBuy={handleResetTotalBuy}
+      />
 
       <div className="grid grid-cols-3 gap-4">
         {products.map((product) => (
@@ -261,65 +247,19 @@ const Home: React.FC<HomeProps> = ({ products }) => {
       </div>
       <div className="flex justify-center mt-5 ">
         <div className="w-full max-w-md p-3 rounded-lg shadow-lg">
-          <h2 className="mt-5 mb-4 text-lg font-semibold">Bought Items:</h2>
-          <div className="bg-white ">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr>
-                  <th className="py-2 border-b">Product</th>
-                  <th className="py-2 border-b">Quantity</th>
-                  <th className="py-2 border-b">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {boughtItems.map((item) => (
-                  <tr key={item.product.id} className="border-b">
-                    <td className="py-2 text-center">{item.product.name}</td>
-                    {editingItemId === item.product.id ? (
-                      <td className="py-2 text-center">
-                        <input
-                          type="number"
-                          min="1"
-                          value={editedQuantity}
-                          onChange={handleChangeEditedQuantity}
-                          className="w-16 px-2 py-1 border border-gray-300"
-                        />
-                      </td>
-                    ) : (
-                      <td className="py-2 text-center">{item.quantity}</td>
-                    )}
-                    <td className="py-2 text-center">
-                      {editingItemId === item.product.id ? (
-                        <button
-                          className="px-3 py-1 mr-2 text-sm font-semibold text-white bg-blue-500 rounded hover:bg-blue-600"
-                          onClick={() => handleUpdateQuantity(item.product.id)}
-                        >
-                          Update
-                        </button>
-                      ) : (
-                        <button
-                          className="px-3 py-1 mr-2 text-sm font-semibold text-white bg-blue-500 rounded hover:bg-blue-600"
-                          onClick={() => handleEditQuantity(item.product.id)}
-                        >
-                          Edit
-                        </button>
-                      )}
-                      <button
-                        className="px-3 py-1 text-sm font-semibold text-white bg-red-500 rounded hover:bg-red-600"
-                        onClick={() => handleRemoveItem(item.product.id)}
-                      >
-                        Remove
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <BoughtItems
+            items={boughtItems}
+            editingItemId={editingItemId}
+            editedQuantity={editedQuantity}
+            onEditQuantity={handleEditQuantity}
+            onChangeEditedQuantity={handleChangeEditedQuantity}
+            onUpdateQuantity={handleUpdateQuantity}
+            onRemoveItem={handleRemoveItem}
+          />
           <div className="flex items-center mt-4 justify-evenly">
-            <p className="text-lg font-semibold">
+            <div className="text-lg font-semibold">
               Total Payment: {totalPayment}
-            </p>
+            </div>
             <button
               className="px-3 py-1 text-sm font-semibold text-white bg-green-500 rounded hover:bg-green-600"
               onClick={() => handleCheckout(totalPayment)}
@@ -329,39 +269,35 @@ const Home: React.FC<HomeProps> = ({ products }) => {
             </button>
           </div>
 
-          <Modal
+          <CustomModal
             isOpen={isSuccessModalOpen}
             onRequestClose={() => setIsSuccessModalOpen(false)}
             contentLabel="Checkout Success"
-            className="fixed inset-0 z-50 flex items-center justify-center shadow-lg"
-            overlayClassName="fixed inset-0 bg-transparent opacity-100 flex items-center justify-center"
           >
             <div className="w-full max-w-md text-white bg-green-600 rounded-lg shadow-lg p-9">
               <h2 className="mb-4 text-2xl font-bold">Pembelian Berhasil!</h2>
-
-              <p className="mb-4">
+              <div className="mb-4">
                 {voucherValue !== undefined && voucherValue !== null ? (
                   <>
                     Terima kasih atas pembelian Anda. Karena total pembelian
                     Anda cukup besar, yaitu <strong>{totalBuy}</strong>, Anda
                     berhak mendapatkan voucher senilai{' '}
-                    <strong>{voucherValue}</strong>. <br /> <br /> Segera
-                    tukarkan voucher tersebut sebelum tanggal{' '}
-                    <strong>{expireDate}</strong>. Anda dapat menukarkannya di
-                    halaman voucher.
+                    <strong>{voucherValue}</strong>.
+                    <br /> <br /> Segera tukarkan voucher tersebut sebelum
+                    tanggal <strong>{expireDate}</strong>. Anda dapat
+                    menukarkannya di halaman voucher.
                     {voucherId && (
-                      <p>
+                      <div>
                         <strong className="mb-4 ">
                           Voucher ID: {voucherId}
                         </strong>{' '}
-                      </p>
+                      </div>
                     )}
                   </>
                 ) : (
                   'Terima kasih atas pembelian Anda.'
                 )}
-              </p>
-
+              </div>
               <button
                 onClick={() => setIsSuccessModalOpen(false)}
                 className="px-4 py-2 mt-4 text-white bg-blue-500 rounded hover:bg-blue-600"
@@ -369,20 +305,18 @@ const Home: React.FC<HomeProps> = ({ products }) => {
                 Tutup
               </button>
             </div>
-          </Modal>
+          </CustomModal>
 
-          <Modal
+          <CustomModal
             isOpen={isFailureModalOpen}
             onRequestClose={() => setIsFailureModalOpen(false)}
             contentLabel="Checkout Failure"
-            className="fixed inset-0 z-50 flex items-center justify-center shadow-lg"
-            overlayClassName="fixed inset-0 bg-transparent opacity-100 flex items-center justify-center"
           >
             <div className="w-full max-w-md text-white bg-red-600 rounded-lg shadow-lg p-9">
               <h2 className="mb-4 text-2xl font-bold">Pembelian Gagal!</h2>
-              <p className="mb-4">
+              <div className="mb-4">
                 Total pembayaran melebihi saldo wallet Anda.
-              </p>
+              </div>
               <button
                 onClick={() => setIsFailureModalOpen(false)}
                 className="px-4 py-2 mt-4 text-white bg-blue-500 rounded hover:bg-blue-600"
@@ -390,7 +324,7 @@ const Home: React.FC<HomeProps> = ({ products }) => {
                 Tutup
               </button>
             </div>
-          </Modal>
+          </CustomModal>
         </div>
       </div>
     </div>
