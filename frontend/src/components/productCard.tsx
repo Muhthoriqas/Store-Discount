@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import Image from 'next/image';
 import 'tailwindcss/tailwind.css';
 
 type Product = {
@@ -27,6 +26,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onBuy }) => {
     setQuantity(quantity + 1);
   };
 
+  const handleChangeQuantity = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newQuantity = parseInt(e.target.value, 10);
+    setQuantity(newQuantity);
+  };
   const handleBuy = () => {
     const totalPayment = quantity * product.price;
     onBuy(product, quantity);
@@ -35,7 +38,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onBuy }) => {
     <div className="overflow-hidden bg-white rounded-lg shadow-lg card">
       <div className="flex justify-center">
         <div className="w-2/4 h-50">
-          <Image
+          <img
             src={product.imageURL}
             alt={product.name}
             style={{ width: '200px', height: '160px' }}
@@ -56,9 +59,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onBuy }) => {
           <input
             type="number"
             min="1"
-            value={quantity}
+            value={isNaN(quantity) ? '' : quantity}
             className="w-16 px-2 py-1 ml-2 border border-gray-300"
-            readOnly
+            onChange={handleChangeQuantity}
           />
           <button
             className="px-4 py-2 ml-2 text-white bg-blue-500 rounded"

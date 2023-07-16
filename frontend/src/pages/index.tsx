@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { GetServerSideProps } from 'next';
-import Modal from 'react-modal'; // Import React-Modal
-import ProductCard from '../components/productCard';
+import Modal from 'react-modal';
+import CustomModal from '../components/CustomModal';
 import Navbar from '../components/Navbar';
+import Wallet from '../components/Wallet';
+import ProductCard from '../components/ProductCard';
+import BoughtItems from '../components/BoughtItems';
 import 'tailwindcss/tailwind.css';
 
 Modal.setAppElement('#__next');
@@ -29,12 +32,59 @@ const Home: React.FC<HomeProps> = ({ products }) => {
   const [boughtItems, setBoughtItems] = useState<CartItem[]>([]);
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [editedQuantity, setEditedQuantity] = useState(0);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [isFailureModalOpen, setIsFailureModalOpen] = useState(false);
   const [voucherId, setVoucherId] = useState<string | null>(null);
   const [voucherValue, setVoucherValue] = useState<number | null>(null);
   const [expireDate, setExpireDate] = useState<string | null>(null);
+  const [wallet, setWalletValue] = useState(0);
+  const [totalBuy, setTotalBuy] = useState(0);
 
-  console.log(voucherValue);
+  const fetchWallet = async () => {
+    try {
+      const response = await axios.get('http://localhost:8080/wallet');
+      setWalletValue(response.data.walletValue);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const fetchTotalBuy = async () => {
+    try {
+      const response = await axios.get('http://localhost:8080/total');
+      setTotalBuy(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const updateWallet = async (newWalletValue: number) => {
+    try {
+      await axios.put('http://localhost:8080/update/wallet', {
+        walletValue: newWalletValue,
+      });
+      setWalletValue(newWalletValue);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const updateTotalBuy = async (newTotalBuy: number) => {
+    try {
+      await axios.put('http://localhost:8080/update/total', {
+        totalbuyerValue: newTotalBuy,
+      });
+
+      setTotalBuy(newTotalBuy);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchWallet();
+    fetchTotalBuy();
+  }, []);
 
   const handleBuy = (product: Product, quantity: number) => {
     const itemIndex = cartItems.findIndex(
@@ -76,6 +126,13 @@ const Home: React.FC<HomeProps> = ({ products }) => {
     }
   };
 
+  const handleChangeEditedQuantity = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const newQuantity = parseInt(e.target.value, 10);
+    setEditedQuantity(newQuantity);
+  };
+
   const handleUpdateQuantity = (itemId: string) => {
     const updatedBoughtItems = boughtItems.map((item) => {
       if (item.product.id === itemId) {
@@ -105,30 +162,42 @@ const Home: React.FC<HomeProps> = ({ products }) => {
     }, 0);
     setTotalPayment(newTotalPayment);
   };
+
   const handleCheckout = async (totalPayment: number) => {
+    if (totalPayment > wallet) {
+      setIsFailureModalOpen(true);
+      return;
+    }
+
     try {
+      let newTotalBuyValue = totalBuy + totalPayment;
+
       const response = await axios.post('http://localhost:8080/checkout', {
         boughtItems,
-        totalPayment,
+        totalBuy: newTotalBuyValue,
       });
-      console.log(response);
-
+      newTotalBuyValue = totalBuy + totalPayment;
       const voucherId = response.data.id;
-      const { voucherValue } = response.data;
-      const { expiresAt } = response.data;
+      const voucherValue = response.data.voucherValue;
+      const expireDate = response.data.expiresAt;
 
-      setIsModalOpen(true);
+      setIsSuccessModalOpen(true);
 
-      console.log('ini', voucherValue);
       if (voucherValue !== undefined && voucherValue !== null) {
         setVoucherId(voucherId);
         setVoucherValue(voucherValue);
-        setExpireDate(expiresAt);
+        setExpireDate(expireDate);
       } else {
         setVoucherValue(null);
       }
 
-      // Reset bought items after checkout
+      // Update wallet and total buy
+      const newWalletValue = wallet - totalPayment;
+
+      updateWallet(newWalletValue);
+      updateTotalBuy(newTotalBuyValue);
+
+      setWalletValue(newWalletValue);
       setBoughtItems([]);
       recalculateTotalPayment();
     } catch (error) {
@@ -140,9 +209,36 @@ const Home: React.FC<HomeProps> = ({ products }) => {
     recalculateTotalPayment();
   }, [boughtItems]);
 
+  const handleResetWallet = async () => {
+    try {
+      const response = await axios.put('http://localhost:8080/reset/wallet');
+      const newWalletValue = response.data.walletValue;
+      setWalletValue(newWalletValue);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleResetTotalBuy = async () => {
+    try {
+      const response = await axios.put('http://localhost:8080/reset/total');
+      const totalbuyerValue = response.data.totalbuyerValue;
+      setTotalBuy(totalbuyerValue);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <div>
       <Navbar />
+
+      <Wallet
+        wallet={wallet}
+        totalBuy={totalBuy}
+        onResetWallet={handleResetWallet}
+        onResetTotalBuy={handleResetTotalBuy}
+      />
 
       <div className="grid grid-cols-3 gap-4">
         {products.map((product) => (
@@ -151,116 +247,84 @@ const Home: React.FC<HomeProps> = ({ products }) => {
       </div>
       <div className="flex justify-center mt-5 ">
         <div className="w-full max-w-md p-3 rounded-lg shadow-lg">
-          <h2 className="mt-5 mb-4 text-lg font-semibold">Bought Items:</h2>
-          <div className="bg-white ">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr>
-                  <th className="py-2 border-b">Product</th>
-                  <th className="py-2 border-b">Quantity</th>
-                  <th className="py-2 border-b">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {boughtItems.map((item) => (
-                  <tr key={item.product.id} className="border-b">
-                    <td className="py-2 text-center">{item.product.name}</td>
-                    {editingItemId === item.product.id ? (
-                      <td className="py-2 text-center">
-                        <input
-                          type="number"
-                          min="1"
-                          value={editedQuantity}
-                          onChange={(e) =>
-                            setEditedQuantity(Number(e.target.value))
-                          }
-                          className="w-16 px-2 py-1 border border-gray-300"
-                        />
-                      </td>
-                    ) : (
-                      <td className="py-2 text-center">{item.quantity}</td>
-                    )}
-                    <td className="py-2 text-center">
-                      {editingItemId === item.product.id ? (
-                        <button
-                          className="px-3 py-1 mr-2 text-sm font-semibold text-white bg-blue-500 rounded hover:bg-blue-600"
-                          onClick={() => handleUpdateQuantity(item.product.id)}
-                        >
-                          Update
-                        </button>
-                      ) : (
-                        <button
-                          className="px-3 py-1 mr-2 text-sm font-semibold text-white bg-blue-500 rounded hover:bg-blue-600"
-                          onClick={() => handleEditQuantity(item.product.id)}
-                        >
-                          Edit
-                        </button>
-                      )}
-                      <button
-                        className="px-3 py-1 text-sm font-semibold text-white bg-red-500 rounded hover:bg-red-600"
-                        onClick={() => handleRemoveItem(item.product.id)}
-                      >
-                        Remove
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <BoughtItems
+            items={boughtItems}
+            editingItemId={editingItemId}
+            editedQuantity={editedQuantity}
+            onEditQuantity={handleEditQuantity}
+            onChangeEditedQuantity={handleChangeEditedQuantity}
+            onUpdateQuantity={handleUpdateQuantity}
+            onRemoveItem={handleRemoveItem}
+          />
           <div className="flex items-center mt-4 justify-evenly">
-            <p className="text-lg font-semibold">
+            <div className="text-lg font-semibold">
               Total Payment: {totalPayment}
-            </p>
+            </div>
             <button
               className="px-3 py-1 text-sm font-semibold text-white bg-green-500 rounded hover:bg-green-600"
               onClick={() => handleCheckout(totalPayment)}
+              disabled={boughtItems.length === 0}
             >
               Checkout
             </button>
           </div>
-          {/* Pop-up */}
 
-          <Modal
-            isOpen={isModalOpen}
-            onRequestClose={() => setIsModalOpen(false)}
+          <CustomModal
+            isOpen={isSuccessModalOpen}
+            onRequestClose={() => setIsSuccessModalOpen(false)}
             contentLabel="Checkout Success"
-            className="fixed inset-0 z-50 flex items-center justify-center shadow-lg"
-            overlayClassName="fixed inset-0 bg-transparent opacity-100 flex items-center justify-center"
           >
             <div className="w-full max-w-md text-white bg-green-600 rounded-lg shadow-lg p-9">
               <h2 className="mb-4 text-2xl font-bold">Pembelian Berhasil!</h2>
-
-              <p className="mb-4">
+              <div className="mb-4">
                 {voucherValue !== undefined && voucherValue !== null ? (
                   <>
-                    Terima kasih atas pembelian Anda. Karena pembelian Anda
-                    cukup besar, Anda berhak mendapatkan voucher senilai{' '}
-                    <strong>{voucherValue}</strong>. <br /> <br /> Segera
-                    tukarkan voucher tersebut sebelum tanggal{' '}
-                    <strong>{expireDate}</strong>. Anda dapat menukarkannya di
-                    halaman voucher.
+                    Terima kasih atas pembelian Anda. Karena total pembelian
+                    Anda cukup besar, yaitu <strong>{totalBuy}</strong>, Anda
+                    berhak mendapatkan voucher senilai{' '}
+                    <strong>{voucherValue}</strong>.
+                    <br /> <br /> Segera tukarkan voucher tersebut sebelum
+                    tanggal <strong>{expireDate}</strong>. Anda dapat
+                    menukarkannya di halaman voucher.
                     {voucherId && (
-                      <p>
+                      <div>
                         <strong className="mb-4 ">
                           Voucher ID: {voucherId}
                         </strong>{' '}
-                      </p>
+                      </div>
                     )}
                   </>
                 ) : (
                   'Terima kasih atas pembelian Anda.'
                 )}
-              </p>
-
+              </div>
               <button
-                onClick={() => setIsModalOpen(false)}
+                onClick={() => setIsSuccessModalOpen(false)}
                 className="px-4 py-2 mt-4 text-white bg-blue-500 rounded hover:bg-blue-600"
               >
                 Tutup
               </button>
             </div>
-          </Modal>
+          </CustomModal>
+
+          <CustomModal
+            isOpen={isFailureModalOpen}
+            onRequestClose={() => setIsFailureModalOpen(false)}
+            contentLabel="Checkout Failure"
+          >
+            <div className="w-full max-w-md text-white bg-red-600 rounded-lg shadow-lg p-9">
+              <h2 className="mb-4 text-2xl font-bold">Pembelian Gagal!</h2>
+              <div className="mb-4">
+                Total pembayaran melebihi saldo wallet Anda.
+              </div>
+              <button
+                onClick={() => setIsFailureModalOpen(false)}
+                className="px-4 py-2 mt-4 text-white bg-blue-500 rounded hover:bg-blue-600"
+              >
+                Tutup
+              </button>
+            </div>
+          </CustomModal>
         </div>
       </div>
     </div>
@@ -269,12 +333,33 @@ const Home: React.FC<HomeProps> = ({ products }) => {
 
 export const getServerSideProps: GetServerSideProps<HomeProps> = async () => {
   try {
-    const response = await axios.get('http://localhost:8080/products');
-    const products = response.data;
-    return { props: { products } };
+    const [productsResponse, walletResponse, totalBuyResponse] =
+      await Promise.all([
+        axios.get('http://localhost:8080/products'),
+        axios.get('http://localhost:8080/wallet'),
+        axios.get('http://localhost:8080/total'),
+      ]);
+
+    const products = productsResponse.data;
+    const walletValue = walletResponse.data.walletValue;
+    const totalBuyValue = totalBuyResponse.data;
+
+    return {
+      props: {
+        products,
+        walletValue,
+        totalBuyValue,
+      },
+    };
   } catch (error) {
     console.error(error);
-    return { props: { products: [] } };
+    return {
+      props: {
+        products: [],
+        walletValue: 0,
+        totalBuyValue: 0,
+      },
+    };
   }
 };
 
