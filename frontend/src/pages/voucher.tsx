@@ -33,7 +33,7 @@ const VoucherPage = () => {
 
       <div className="flex justify-center p-5">
         <div className="w-full sm:w-2/3 lg:w-1/2">
-          <h1 className="text-2xl font-bold mb-4 mt-5 text-center">
+          <h1 className="mt-5 mb-4 text-2xl font-bold text-center">
             Daftar Voucher
           </h1>
           <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
@@ -57,7 +57,7 @@ const VoucherPage = () => {
               <tbody>
                 {vouchers.map((voucher, index) => (
                   <tr
-                    className="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-600 text-white"
+                    className="text-white bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-600"
                     key={voucher.id}
                   >
                     <td className="px-6 py-4 text-center">{index + 1}</td>

@@ -232,10 +232,10 @@ const Home: React.FC<HomeProps> = ({ products }) => {
     <div>
       <Navbar />
 
-      <div className="flex flex-row items-center justify-between m-4 shadow-lg p-4">
+      <div className="flex flex-row items-center justify-between p-4 m-4 shadow-lg">
         <div>
-          <h1 className="font-semibold m-0 text-2xl">Wallet: {wallet}</h1>
-          <h1 className="font-semibold m-0 text-2xl">Total Buy: {totalBuy}</h1>
+          <h1 className="m-0 text-2xl font-semibold">Wallet: {wallet}</h1>
+          <h1 className="m-0 text-2xl font-semibold">Total Buy: {totalBuy}</h1>
         </div>
 
         <div>
@@ -342,8 +342,9 @@ const Home: React.FC<HomeProps> = ({ products }) => {
               <p className="mb-4">
                 {voucherValue !== undefined && voucherValue !== null ? (
                   <>
-                    Terima kasih atas pembelian Anda. Karena pembelian Anda
-                    cukup besar, Anda berhak mendapatkan voucher senilai{' '}
+                    Terima kasih atas pembelian Anda. Karena total pembelian
+                    Anda cukup besar, yaitu <strong>{totalBuy}</strong>, Anda
+                    berhak mendapatkan voucher senilai{' '}
                     <strong>{voucherValue}</strong>. <br /> <br /> Segera
                     tukarkan voucher tersebut sebelum tanggal{' '}
                     <strong>{expireDate}</strong>. Anda dapat menukarkannya di
