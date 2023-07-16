@@ -3,7 +3,6 @@ import {
   getAllProducts,
   checkout,
   getAllVouchers,
-  getVoucherById,
   redeemVoucher,
   getWallet,
   updateWallet,
@@ -19,7 +18,6 @@ router.get('/products', getAllProducts);
 router.post('/checkout', checkout);
 
 router.get('/vouchers', getAllVouchers);
-router.get('/vouchers/:id', getVoucherById);
 router.post('/redeem', redeemVoucher);
 
 router.get('/wallet', getWallet);
