@@ -127,7 +127,7 @@ Follow this step to run this repostory code in your local device:
   cd backend && npm install
   ```
 5. Make sure you already have the [Credential File](#key-credential-file) and store the credential *file name* in  `app/config/config.sample.json` file.
-6. And also Change `projectID, bucketName, and databaseURL` value at `app/config/config.sample.json` file, with your GCP project id, bucket name, and firestore database url, see the example [here](https://github-production-user-asset-6210df.s3.amazonaws.com/72277295/243223361-3196686f-7fa0-4ed5-a64a-d8fc5fdc9814.PNG) 
+6. And also Change `projectID, bucketName, and databaseURL` value at `app/config/config.sample.json` file, with your GCP project id, bucket name, and firestore database url
 7. Change `config.sample.json` file name to `config.json`
 8. Start the server
    ```sh
