@@ -17,7 +17,9 @@ const VoucherPage = () => {
 
   const fetchVouchers = async () => {
     try {
-      const response = await axios.get('http://localhost:8080/vouchers');
+      const response = await axios.get(
+        'https://store-discount-image-lmzymzncdq-et.a.run.app/vouchers'
+      );
       setVouchers(response.data);
     } catch (error) {
       console.error(error);

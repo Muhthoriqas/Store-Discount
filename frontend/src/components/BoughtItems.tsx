@@ -33,7 +33,9 @@ const BoughtItems: React.FC<BoughtItemsProps> = ({
 }) => {
   return (
     <div>
-      <h2 className="mt-5 mb-4 text-lg font-semibold">Bought Items:</h2>
+      <h1 className="mt-5 mb-4 text-2xl font-semibold text-center text-blue-500 ">
+        Bought Items
+      </h1>
       <div className="bg-white">
         <table className="w-full border-collapse">
           <thead>

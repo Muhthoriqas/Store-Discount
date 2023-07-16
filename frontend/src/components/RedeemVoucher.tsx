@@ -10,9 +10,12 @@ const RedeemVoucher = () => {
 
   const handleRedeem = async () => {
     try {
-      const response = await axios.post('http://localhost:8080/redeem', {
-        voucherId,
-      });
+      const response = await axios.post(
+        'https://store-discount-image-lmzymzncdq-et.a.run.app/redeem',
+        {
+          voucherId,
+        }
+      );
 
       const { message, voucherValue } = response.data;
       setMessage(message);

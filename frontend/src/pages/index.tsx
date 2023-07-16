@@ -42,7 +42,9 @@ const Home: React.FC<HomeProps> = ({ products }) => {
 
   const fetchWallet = async () => {
     try {
-      const response = await axios.get('http://localhost:8080/wallet');
+      const response = await axios.get(
+        'https://store-discount-image-lmzymzncdq-et.a.run.app/wallet'
+      );
       setWalletValue(response.data.walletValue);
     } catch (error) {
       console.error(error);
@@ -51,7 +53,9 @@ const Home: React.FC<HomeProps> = ({ products }) => {
 
   const fetchTotalBuy = async () => {
     try {
-      const response = await axios.get('http://localhost:8080/total');
+      const response = await axios.get(
+        'https://store-discount-image-lmzymzncdq-et.a.run.app/total'
+      );
       setTotalBuy(response.data);
     } catch (error) {
       console.error(error);
@@ -60,9 +64,12 @@ const Home: React.FC<HomeProps> = ({ products }) => {
 
   const updateWallet = async (newWalletValue: number) => {
     try {
-      await axios.put('http://localhost:8080/update/wallet', {
-        walletValue: newWalletValue,
-      });
+      await axios.put(
+        'https://store-discount-image-lmzymzncdq-et.a.run.app/update/wallet',
+        {
+          walletValue: newWalletValue,
+        }
+      );
       setWalletValue(newWalletValue);
     } catch (error) {
       console.error(error);
@@ -71,9 +78,12 @@ const Home: React.FC<HomeProps> = ({ products }) => {
 
   const updateTotalBuy = async (newTotalBuy: number) => {
     try {
-      await axios.put('http://localhost:8080/update/total', {
-        totalbuyerValue: newTotalBuy,
-      });
+      await axios.put(
+        'https://store-discount-image-lmzymzncdq-et.a.run.app/update/total',
+        {
+          totalbuyerValue: newTotalBuy,
+        }
+      );
 
       setTotalBuy(newTotalBuy);
     } catch (error) {
@@ -172,10 +182,13 @@ const Home: React.FC<HomeProps> = ({ products }) => {
     try {
       let newTotalBuyValue = totalBuy + totalPayment;
 
-      const response = await axios.post('http://localhost:8080/checkout', {
-        boughtItems,
-        totalBuy: newTotalBuyValue,
-      });
+      const response = await axios.post(
+        'https://store-discount-image-lmzymzncdq-et.a.run.app/checkout',
+        {
+          boughtItems,
+          totalBuy: newTotalBuyValue,
+        }
+      );
       newTotalBuyValue = totalBuy + totalPayment;
       const voucherId = response.data.id;
       const voucherValue = response.data.voucherValue;
@@ -211,7 +224,9 @@ const Home: React.FC<HomeProps> = ({ products }) => {
 
   const handleResetWallet = async () => {
     try {
-      const response = await axios.put('http://localhost:8080/reset/wallet');
+      const response = await axios.put(
+        'https://store-discount-image-lmzymzncdq-et.a.run.app/reset/wallet'
+      );
       const newWalletValue = response.data.walletValue;
       setWalletValue(newWalletValue);
     } catch (error) {
@@ -221,7 +236,9 @@ const Home: React.FC<HomeProps> = ({ products }) => {
 
   const handleResetTotalBuy = async () => {
     try {
-      const response = await axios.put('http://localhost:8080/reset/total');
+      const response = await axios.put(
+        'https://store-discount-image-lmzymzncdq-et.a.run.app/reset/total'
+      );
       const totalbuyerValue = response.data.totalbuyerValue;
       setTotalBuy(totalbuyerValue);
     } catch (error) {
@@ -335,9 +352,13 @@ export const getServerSideProps: GetServerSideProps<HomeProps> = async () => {
   try {
     const [productsResponse, walletResponse, totalBuyResponse] =
       await Promise.all([
-        axios.get('http://localhost:8080/products'),
-        axios.get('http://localhost:8080/wallet'),
-        axios.get('http://localhost:8080/total'),
+        axios.get(
+          'https://store-discount-image-lmzymzncdq-et.a.run.app/products'
+        ),
+        axios.get(
+          'https://store-discount-image-lmzymzncdq-et.a.run.app/wallet'
+        ),
+        axios.get('https://store-discount-image-lmzymzncdq-et.a.run.app/total'),
       ]);
 
     const products = productsResponse.data;
