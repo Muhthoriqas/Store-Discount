@@ -57,10 +57,8 @@
 
 <!-- Screenshots -->
 ### :camera: Screenshots
-<div align="center" style="">
-  <img src="https://github.com/Muhthoriqas/Store-DiscountStore-Discount/assets/72277295/5597a258-2b16-40b4-b2de-102cea468907" alt="Arc-Barkit drawio" width="400" height="330" style="display: inline-block;">
-  <img src="https://github.com/Muhthoriqas/Store-DiscountStore-Discount/assets/72277295/4e72a58b-8a06-4a57-a452-1d3103d5bac8" alt="Database drawio" width="400" height="330" style="display: inline-block; margin-left:15px;">
-</div>
+![store-discount](https://github.com/Muhthoriqas/Store-Discount/assets/72277295/d739af37-9d1d-4f12-8093-4f0af7db4c90)
+![store-discount-voucher](https://github.com/Muhthoriqas/Store-Discount/assets/72277295/58c47ece-5d01-42f4-af14-d1b622f945dd)
 
 <!-- TechStack -->
 ### :space_invader: Tech Stack
@@ -137,9 +135,10 @@ Follow this step to run this repostory code in your local device:
    npm run dev (using nodemon)
    ```
 9. open new terminal and go to front end directory
-   ``` sh
-  cd frontend && npm install ```
-10. Start the frontend server
+   ```sh
+  cd frontend && npm install 
+  ``
+11. Start the frontend server
    ```sh
    npm run dev 
    ```
@@ -170,8 +169,8 @@ Muhammad Thoriq Ali Said - [LinkedIn](https://www.linkedin.com/in/thoriqas/) - [
 
   Bellow is useful resource that we used in our project
  
- - [Next.js Docs]([https://firebase.google.com/docs/reference/node](https://nextjs.org/docs))
- - [Express.js Docs]([https://cloud.google.com/docs](https://expressjs.com/))
+ - [Next.js Docs](https://nextjs.org/docs)
+ - [Express.js Docs](https://expressjs.com/)
  - [Clour Run Deploy With Artifact Registery](https://www.youtube.com/watch?v=b7G1pmd-0mk)
  - [Cloud Run CI/CD Tutorial](https://www.youtube.com/watch?v=Sh4I-s7O8rs&t=111s)
  - [Readme Template](https://github.com/Louis3797/awesome-readme-template)
