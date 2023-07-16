@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 
 const Navbar: React.FC = () => {
   return (
@@ -6,20 +7,20 @@ const Navbar: React.FC = () => {
       <div className="flex items-center">
         <ul className="flex mx-auto space-x-10 lg:mx-0">
           <li>
-            <a
+            <Link
               href="/"
               className="p-3 rounded-md hover:text-black hover:bg-white"
             >
               Home
-            </a>
+            </Link>
           </li>
           <li>
-            <a
+            <Link
               href="/voucher"
               className="p-3 rounded-md hover:text-black hover:bg-white"
             >
               Voucher
-            </a>
+            </Link>
           </li>
         </ul>
       </div>
