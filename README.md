@@ -27,9 +27,11 @@
 </p>
    
 <h4>
-    <a href="https://github.com/Muhthoriqas/Store-DiscountStore-Discount/issues/">Report Bug</a>
+      <a href="https://store-discount.vercel.app/">Live Demo</a>
   <span> · </span>
-    <a href="https://github.com/Muhthoriqas/Store-DiscountStore-Discount/issues/">Request Feature</a>
+    <a href="https://github.com/Muhthoriqas/Store-Discount/issues">Report Bug</a>
+  <span> · </span>
+    <a href="https://github.com/Muhthoriqas/Store-Discount/issues/">Request Feature</a>
   </h4>
 </div>
 
@@ -57,6 +59,9 @@
 
 <!-- Screenshots -->
 ### :camera: Screenshots
+
+#### Live Demo: https://store-discount.vercel.app/</h1>
+
 ![store-discount](https://github.com/Muhthoriqas/Store-Discount/assets/72277295/d739af37-9d1d-4f12-8093-4f0af7db4c90)
 ![store-discount-voucher](https://github.com/Muhthoriqas/Store-Discount/assets/72277295/58c47ece-5d01-42f4-af14-d1b622f945dd)
 
