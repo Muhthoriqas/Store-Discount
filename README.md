@@ -140,13 +140,14 @@ Follow this step to run this repostory code in your local device:
    npm run dev (using nodemon)
    ```
 9. open new terminal and go to front end directory
-   ```sh
+  ```sh
   cd frontend && npm install 
-  ``
-11. Start the frontend server
+  ```
+10. Start the frontend server
    ```sh
    npm run dev 
    ```
+
  _Note:_
   1. Steps 5-7 are only performed if you do not have access to [My Credential](https://drive.google.com/drive/folders/1sId4l4MII9uacp-welga4b0qU1lGSFnw?usp=drive_link). If you are someone we know, please request to obtain our credentials and config file. After you download our credential make sure to store it at app/config folder.
 
