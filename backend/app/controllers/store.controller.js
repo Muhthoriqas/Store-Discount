@@ -119,9 +119,6 @@ const redeemVoucher = async (req, res) => {
       currentDate.getMonth() + 1
     }-${currentDate.getFullYear()} ${currentDate.getHours()}:${currentDate.getMinutes()}:${currentDate.getSeconds()}`;
 
-    console.log(formattedCurrentDate);
-    console.log(expiresAt);
-
     const isExpired = formattedCurrentDate > expiresAt;
 
     if (isExpired) {
