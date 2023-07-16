@@ -5,7 +5,7 @@ import Modal from 'react-modal';
 import CustomModal from '../components/CustomModal';
 import Navbar from '../components/Navbar';
 import Wallet from '../components/Wallet';
-import ProductCard from '@/components/ProductCard';
+import ProductCard from '../components/CardProducts';
 import BoughtItems from '../components/BoughtItems';
 import 'tailwindcss/tailwind.css';
 
