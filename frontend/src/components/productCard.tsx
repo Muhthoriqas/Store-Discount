@@ -59,7 +59,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onBuy }) => {
           <input
             type="number"
             min="1"
-            value={quantity}
+            value={isNaN(quantity) ? '' : quantity}
             className="w-16 px-2 py-1 ml-2 border border-gray-300"
             onChange={handleChangeQuantity}
           />
