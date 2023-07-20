@@ -2,11 +2,6 @@
 
   <h1>Store Discount</h1>
   
-  <p>
-    Garuda Cyber Indonesia 
-  </p>
-  
-  
 <!-- Badges -->
 <p>
   <a href="https://github.com/Muhthoriqas/Store-DiscountStore-Discount/graphs/contributors">
@@ -93,7 +88,7 @@ To run this project, you will need the following credential file:
   </ul>
   
 _Note:_ 
-  <em>Note: if you are someone i know, request & <strong>download our credential</strong> <a href="https://drive.google.com/drive/folders/1sId4l4MII9uacp-welga4b0qU1lGSFnw?usp=drive_link)">Here</a></em>
+  <em>Note: if you are someone i know, request & <strong>download my credential</strong> <a href="https://drive.google.com/drive/folders/1sId4l4MII9uacp-welga4b0qU1lGSFnw?usp=drive_link)">Here</a></em>
   
 <!-- Getting Started -->
 ## 	:toolbox: Getting Started
@@ -149,7 +144,7 @@ Follow this step to run this repostory code in your local device:
    ```
 
  _Note:_
-  1. Steps 5-7 are only performed if you do not have access to [My Credential](https://drive.google.com/drive/folders/1sId4l4MII9uacp-welga4b0qU1lGSFnw?usp=drive_link). If you are someone we know, please request to obtain our credentials and config file. After you download our credential make sure to store it at app/config folder.
+  1. Steps 5-7 are only performed if you do not have access to [My Credential](https://drive.google.com/drive/folders/1sId4l4MII9uacp-welga4b0qU1lGSFnw?usp=drive_link). If you are someone i know, please request to obtain my credentials and config file. After you download my credential make sure to store it at app/config folder.
 
 <!-- Contributing -->
 ## :wave: Contributing
@@ -159,7 +154,7 @@ Follow this step to run this repostory code in your local device:
 Contributions are always welcome!
 All types of contributions are encouraged and valued. It will make it a lot easier for us maintainers and smooth out the experience for all involved. The community looks forward to your contributions. 🎉
 
-> And if you like the project, but just don't have time to contribute, that's fine. There are other easy ways to support the project and show your appreciation, which we would also be very happy about:
+> And if you like the project, but just don't have time to contribute, that's fine. There are other easy ways to support the project and show your appreciation, which i would also be very happy about:
 > - Star the project
 > - Tweet about it
 > - Refer this project in your project's readme
@@ -173,7 +168,7 @@ Muhammad Thoriq Ali Said - [LinkedIn](https://www.linkedin.com/in/thoriqas/) - [
 <!-- Acknowledgments -->
 ## :gem: Acknowledgements
 
-  Bellow is useful resource that we used in our project
+  Bellow is useful resource that i used in my project
  
  - [Next.js Docs](https://nextjs.org/docs)
  - [Express.js Docs](https://expressjs.com/)
